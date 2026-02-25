@@ -2,107 +2,70 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>Fastfood Bonnetje</title>
+<title>USB Bonprinter</title>
 <style>
     body {
-        background-color: #e5e5e5;
-        font-family: 'Courier New', monospace;
-    }
-
-    .receipt {
-        width: 301px;
-        background: #fff;
-        margin: 40px auto;
-        padding: 20px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        border-radius: 5px;
-    }
-
-    .center {
+        font-family: monospace;
+        background: #f0f0f0;
         text-align: center;
+        padding: 40px;
     }
 
-    .divider {
-        border-top: 1px dashed #000;
-        margin: 10px 0;
+    button {
+        padding: 15px 30px;
+        font-size: 18px;
+        background: black;
+        color: white;
+        border: none;
+        cursor: pointer;
     }
 
-    .item {
-        display: flex;
-        justify-content: space-between;
-        font-size: 14px;
-        margin-bottom: 5px;
-    }
-
-    .total {
-        font-weight: bold;
-        font-size: 16px;
-    }
-
-    .small {
-        font-size: 12px;
+    button:hover {
+        background: #333;
     }
 </style>
 </head>
 <body>
 
-<div class="receipt">
-    <div class="center">
-        <h2>BURGER EXPRESS</h2>
-        <p class="small">Hoofdstraat 12<br>1234 AB Amsterdam</p>
-        <p class="small">Tel: 020-1234567</p>
-    </div>
+<h1>Fastfood Bon Printen</h1>
+<button onclick="printReceipt()">Print Bonnetje</button>
 
-    <div class="divider"></div>
+<script>
+async function printReceipt() {
+    try {
+        const device = await navigator.usb.requestDevice({
+            filters: [{ vendorId: 0x1155 }] // Pas aan naar jouw printer vendorId
+        });
 
-    <div class="small">
-        Datum: 25-02-2026<br>
-        Tijd: 18:42<br>
-        Kassabon: 004582<br>
-        Kassa: 02
-    </div>
+        await device.open();
+        await device.selectConfiguration(1);
+        await device.claimInterface(0);
 
-    <div class="divider"></div>
+        const encoder = new TextEncoder();
 
-    <div class="item">
-        <span>1x Cheeseburger</span>
-        <span>€ 3,50</span>
-    </div>
-    <div class="item">
-        <span>1x Grote Friet</span>
-        <span>€ 2,80</span>
-    </div>
-    <div class="item">
-        <span>1x Cola 0,5L</span>
-        <span>€ 2,40</span>
-    </div>
+        const receipt =
+            "\x1B\x40" +                     // Initialize printer
+            "BURGER EXPRESS\n" +
+            "Hoofdstraat 12\n" +
+            "Amsterdam\n" +
+            "------------------------------\n" +
+            "1x Cheeseburger     3.50\n" +
+            "1x Grote Friet      2.80\n" +
+            "1x Cola 0.5L        2.40\n" +
+            "------------------------------\n" +
+            "TOTAAL:             9.48\n\n" +
+            "Bedankt voor uw bezoek!\n\n\n" +
+            "\x1D\x56\x00";                  // Cut paper
 
-    <div class="divider"></div>
+        await device.transferOut(1, encoder.encode(receipt));
 
-    <div class="item">
-        <span>Subtotaal</span>
-        <span>€ 8,70</span>
-    </div>
-    <div class="item">
-        <span>BTW (9%)</span>
-        <span>€ 0,78</span>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="item total">
-        <span>TOTAAL</span>
-        <span>€ 9,48</span>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="center small">
-        Betaalmethode: PIN<br><br>
-        Bedankt voor uw bezoek!<br>
-        Tot ziens!
-    </div>
-</div>
+        alert("Bonnetje geprint!");
+    } catch (error) {
+        console.error(error);
+        alert("Printer niet gevonden of toegang geweigerd.");
+    }
+}
+</script>
 
 </body>
 </html>
