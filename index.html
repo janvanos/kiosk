@@ -45,7 +45,7 @@ async function printReceipt() {
 
         const receipt =
             "\x1B\x40" +                     // Initialize printer
-            "BURGER EXPRESS\n" +
+            "BURGER EXPRESS!\n" +
             "Hoofdstraat 12\n" +
             "Amsterdam\n" +
             "------------------------------\n" +
@@ -55,14 +55,13 @@ async function printReceipt() {
             "------------------------------\n" +
             "TOTAAL:             9.48\n\n" +
             "Bedankt voor uw bezoek!\n\n\n" +
-            "" +
-            "\x1D\x56\x01";                  // Feed line
-
-            "\x1D\x56\x01";                  // Feed line
-            "\x1D\x56\x01";                  // Feed line
-            "\x1D\x56\x01";                  // Feed line
-            "\x1D\x56\x01";                  // Feed line
-            "\x1D\x56\x01";                  // Feed line
+            "\n\n\n" +
+            "\n\n\n" +
+            "\n\n\n" +
+            "\n\n\n" +
+            "\n\n\n" +
+            "\n\n\n" +
+          
             "\x1D\x56\x00";                  // Cut paper
 
         await device.transferOut(1, encoder.encode(receipt));
