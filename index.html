@@ -34,7 +34,7 @@
 async function printReceipt() {
     try {
         const device = await navigator.usb.requestDevice({
-            filters: [{ vendorId: 0x1155 }] // Pas aan naar jouw printer vendorId
+            filters: [{ vendorId: 0x0483 }] // Pas aan naar jouw printer vendorId
         });
 
         await device.open();
