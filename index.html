@@ -28,52 +28,80 @@
 <body>
 
 <h1>Fastfood Bon Printen</h1>
-<button onclick="printReceipt()">Print Bonnetje</button>
+<button onclick="printReceipt()">Print Bonnetje!</button>
 
 <script>
-async function printReceipt() {
-    try {
-        const device = await navigator.usb.requestDevice({
-            filters: [{ vendorId: 0x0483 }] // Pas aan naar jouw printer vendorId
-        });
+// async function printReceipt() {
+//     try {
+//         const device = await navigator.usb.requestDevice({
+//             filters: [{ vendorId: 0x0483 }] // Pas aan naar jouw printer vendorId
+//         });
 
-        await device.open();
+//         await device.open();
+//         await device.selectConfiguration(1);
+//         await device.claimInterface(0);
+
+//         const encoder = new TextEncoder();
+
+//         const receipt =
+//             "\x1B\x40" +                     // Initialize printer
+//             "BURGER EXPRESS!\n" +
+//             "Hoofdstraat 12\n" +
+//             "Amsterdam\n" +
+//             "------------------------------\n" +
+//             "1x Cheeseburger     3.50\n" +
+//             "1x Grote Friet      2.80\n" +
+//             "1x Cola 0.5L        2.40\n" +
+//             "------------------------------\n" +
+//             "TOTAAL:             9.48\n\n" +
+//             "Bedankt voor uw bezoek!\n\n\n" +
+//             "\n\n\n" +
+//             "\n\n\n" +
+//             "\n\n\n" +
+//             "\x1D\x56\x00";                  // Cut paper
+
+//         await device.transferOut(1, encoder.encode(receipt));
+
+//         alert("Bonnetje geprint!");
+//     } catch (error) {
+//         console.error(error);
+//         alert("Printer niet gevonden of toegang geweigerd.");
+//     }
+// }
+
+// printReceipt();
+
+
+async function printReceipt2() {
+    const device = await navigator.usb.requestDevice({
+        filters: [{ vendorId: 1155 }]
+    });
+
+    await device.open();
+
+    if (device.configuration === null) {
         await device.selectConfiguration(1);
-        await device.claimInterface(0);
-
-        const encoder = new TextEncoder();
-
-        const receipt =
-            "\x1B\x40" +                     // Initialize printer
-            "BURGER EXPRESS!\n" +
-            "Hoofdstraat 12\n" +
-            "Amsterdam\n" +
-            "------------------------------\n" +
-            "1x Cheeseburger     3.50\n" +
-            "1x Grote Friet      2.80\n" +
-            "1x Cola 0.5L        2.40\n" +
-            "------------------------------\n" +
-            "TOTAAL:             9.48\n\n" +
-            "Bedankt voor uw bezoek!\n\n\n" +
-            "\n\n\n" +
-            "\n\n\n" +
-            "\n\n\n" +
-            "\n\n\n" +
-            "\n\n\n" +
-            "\n\n\n" +
-          
-            "\x1D\x56\x00";                  // Cut paper
-
-        await device.transferOut(1, encoder.encode(receipt));
-
-        alert("Bonnetje geprint!");
-    } catch (error) {
-        console.error(error);
-        alert("Printer niet gevonden of toegang geweigerd.");
     }
-}
 
-printReceipt();
+    const iface = device.configuration.interfaces[0];
+    await device.claimInterface(iface.interfaceNumber);
+
+    const endpoint = iface.alternate.endpoints.find(e => e.direction === "out");
+
+    const encoder = new TextEncoder();
+
+    const data =
+        "\x1B\x40" +
+        "BURGER EXPRESS\n" +
+        "------------------------------\n" +
+        "TOTAAL: 9.48\n\n\n" +
+        "\x1D\x56\x00";
+
+    await device.transferOut(endpoint.endpointNumber, encoder.encode(data));
+
+    await device.close();
+}
+printReceipt2();
 </script>
 
 </body>
